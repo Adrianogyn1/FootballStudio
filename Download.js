@@ -1,4 +1,29 @@
+// Coloque a classe Resultado no topo do arquivo:
+class Resultado {
+  constructor({ horario, home, away, resultado, troca_de_baralho }) {
+    this.horario = horario;
+    this.home = home;
+    this.away = away;
+    this.resultado = resultado;
+    this.troca_de_baralho = troca_de_baralho;
+  }
 
+  equals(other) {
+    return other && this.horario === other.horario;
+  }
+
+  toJSON() {
+    return {
+      horario: this.horario,
+      home: this.home,
+      away: this.away,
+      resultado: this.resultado,
+      troca_de_baralho: this.troca_de_baralho,
+    };
+  }
+}
+
+// Depois o código de download e processamento:
 const fs = require("fs");
 const https = require("https");
 const path = require("path");
@@ -7,36 +32,65 @@ const url = "https://app.ingridfs.com/inc/historico.php";
 const outputDir = "data";
 fs.mkdirSync(outputDir, { recursive: true });
 
-const idPath = path.join(outputDir, "ultima_jogada.txt");
-let jogadaId = fs.existsSync(idPath) ? parseInt(fs.readFileSync(idPath)) : 1;
-
 https.get(url, (res) => {
   let data = "";
-  res.on("data", (chunk) => data += chunk);
+
+  res.on("data", (chunk) => (data += chunk));
   res.on("end", () => {
     try {
       const json = JSON.parse(data);
-      let buffer = [];
+      const porDia = {};
 
-      for (const item of json) {
-        buffer.push(item);
+      // Transformar objetos JSON em instâncias Resultado
+      const resultados = json.map((item) => new Resultado(item));
 
-        if (item.troca_de_baralho === true) {
-          if (buffer.length > 1) {
-            const filename = path.join(outputDir, `jogada_${jogadaId}.json`);
-            fs.writeFileSync(filename, JSON.stringify(buffer.slice(0, -1), null, 2));
-            jogadaId++;
-            fs.writeFileSync(idPath, jogadaId.toString());
-          }
-          buffer = [item];
-        }
+      // Agrupar por dia
+      for (const resultado of resultados) {
+        const [dataStr] = resultado.horario.split(" ");
+        const [ano, mes, dia] = dataStr.split("-");
+        const nomeArquivo = `resultado_${dia}_${mes}_${ano}.json`;
+
+        if (!porDia[nomeArquivo]) porDia[nomeArquivo] = [];
+        porDia[nomeArquivo].push(resultado);
       }
 
-      fs.writeFileSync(path.join(outputDir, "temporario.json"), JSON.stringify(buffer, null, 2));
+      for (const nome in porDia) {
+        const caminho = path.join(outputDir, nome);
+
+        let existentes = [];
+        if (fs.existsSync(caminho)) {
+          try {
+            const existentesJson = JSON.parse(fs.readFileSync(caminho, "utf8"));
+            existentes = existentesJson.map((item) => new Resultado(item));
+          } catch {}
+        }
+
+        // Unir e remover duplicatas via horario
+        const todos = [...existentes, ...porDia[nome]];
+
+        // Mapa para remover duplicatas pela chave horario
+        const unicosMap = new Map();
+        for (const r of todos) {
+          unicosMap.set(r.horario, r);
+        }
+        const unicos = Array.from(unicosMap.values()).sort(
+          (a, b) => new Date(a.horario) - new Date(b.horario)
+        );
+
+        // Salvar chamando toJSON()
+        fs.writeFileSync(
+          caminho,
+          JSON.stringify(unicos.map((r) => r.toJSON()), null, 2)
+        );
+
+        console.log(`Atualizado: ${nome} (${unicos.length} registros únicos)`);
+      }
     } catch (e) {
       console.error("Erro ao processar JSON:", e);
+      process.exit(1);
     }
   });
 }).on("error", (err) => {
   console.error("Erro ao baixar JSON:", err);
+  process.exit(1);
 });
