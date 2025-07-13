@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: '18'
 
-      - run: node scripts/fetch-json.js
+      - run: node Download.js
 
       - run: |
           git config user.name "github-actions"
