@@ -96,8 +96,8 @@
       fetch('./data/' + arquivo)
         .then(res => res.json())
         .then(data => {
-          mostrarRoadmapTorre(data);
-          mostrarTabela(data);
+          mostrarRoadmapTorre(data.reverse());
+          mostrarTabela(data.reverse();
         })
         .catch(error => {
           console.error('Erro ao carregar arquivo JSON:', error);
