@@ -55,7 +55,7 @@
 
     <div class="form-check form-switch mb-3">
       <input class="form-check-input" type="checkbox" id="liveSwitch" />
-      <label class="form-check-label" for="liveSwitch">Live Result (Atualizar a cada 5s)</label>
+      <label class="form-check-label" for="liveSwitch">Live Result (Atualizar a cada 15s)</label>
     </div>
 
     <div id="roadmap"></div>
@@ -162,17 +162,16 @@
 
       fetch(url)
         .then(res => {
-          if (!res.ok) throw new Error('Erro ao carregar JSON');
+          if (!res.ok) throw new Error('Erro ao carregar JSON: ' + res.status + ' ' + res.statusText);
           return res.text();
         })
         .then(text => {
-          console.log('Resposta da URL:', text);
           let data;
           try {
             data = JSON.parse(text);
           } catch(e) {
             console.error('Erro ao parsear JSON:', e);
-            roadmap.innerHTML = '<p class="text-danger">JSON inválido da URL externa.</p>';
+            roadmap.innerHTML = `<p class="text-danger">JSON inválido da URL externa: <br><pre>${e}</pre></p>`;
             resultTable.classList.add('d-none');
             document.getElementById('stats').innerHTML = '';
             document.getElementById('streaks').innerHTML = '';
@@ -192,7 +191,7 @@
         })
         .catch(error => {
           console.error('Erro na requisição:', error);
-          roadmap.innerHTML = '<p class="text-danger">Erro ao carregar os dados.</p>';
+          roadmap.innerHTML = `<p class="text-danger">Erro ao carregar os dados: <br><pre>${error}</pre></p>`;
           resultTable.classList.add('d-none');
           document.getElementById('stats').innerHTML = '';
           document.getElementById('streaks').innerHTML = '';
@@ -233,18 +232,19 @@
       }
       if (colunaAtual.length > 0) colunas.push(colunaAtual);
 
-      colunas.forEach(coluna => {
-        for (let i = 0; i < 6; i++) {
-          const result = coluna[i];
+      roadmap.style.display = 'grid';
+      roadmap.style.gridAutoFlow = 'column';
+      roadmap.style.gridTemplateRows = `repeat(${Math.max(...colunas.map(c => c.length))}, 32px)`;
+      roadmap.innerHTML = '';
+
+      colunas.forEach((coluna, colunaIndex) => {
+        coluna.forEach((result, rowIndex) => {
           const div = document.createElement('div');
-          if (result) {
-            div.className = 'circle ' + result;
-          } else {
-            div.style.width = '28px';
-            div.style.height = '28px';
-          }
+          div.className = 'circle ' + result;
+          div.style.gridColumnStart = colunaIndex + 1;
+          div.style.gridRowStart = rowIndex + 1;
           roadmap.appendChild(div);
-        }
+        });
       });
     }
 
