@@ -31,7 +31,7 @@
       background-color: #2196f3; /* azul para Away */
       border-color: #1565c0;
     }
-    .E {
+    .D {
       background-color: #ffeb3b; /* amarelo para Empate */
       border-color: #fbc02d;
     }
@@ -207,11 +207,11 @@
       for (let i = 0; i < data.length; i++) {
         const res = data[i].resultado;
 
-        if (res === 'E') {
+        if (res === 'D') {
           if (colunaAtual.length === 0) {
-            colunaAtual.push('E');
+            colunaAtual.push('D');
           } else {
-            colunaAtual.push('E');
+            colunaAtual.push('D');
           }
           continue;
         }
@@ -284,7 +284,7 @@
           case 'A':
             stats.awayWins++;
             break;
-          case 'E':
+          case 'D':
             stats.empates++;
             break;
         }
@@ -306,7 +306,7 @@
           <li>Total de jogos: ${stats.total}</li>
           <li>Vitórias Home (H): ${stats.homeWins} (${stats.homePercent}%)</li>
           <li>Vitórias Away (A): ${stats.awayWins} (${stats.awayPercent}%)</li>
-          <li>Empates (E): ${stats.empates} (${stats.empatesPercent}%)</li>
+          <li>Empates (D): ${stats.empates} (${stats.empatesPercent}%)</li>
           <li>Trocas de Baralho: ${stats.trocasBaralho}</li>
         </ul>
       `;
@@ -327,7 +327,7 @@
       for (let i = 0; i < dataOrdenada.length; i++) {
         const rodada = dataOrdenada[i];
         const res = rodada.resultado;
-        if (res === 'E') continue;
+        if (res === 'D') continue;
 
         let cartaAtual = null;
         if (res === 'H') cartaAtual = limparCarta(rodada.home);
@@ -343,7 +343,7 @@
         }
 
         const resProx = proximaRodada.resultado;
-        if (resProx === 'E') {
+        if (resProx === 'D') {
           streakAtual[cartaAtual] = (streakAtual[cartaAtual] || 0) + 1;
           if (!maiorStreak[cartaAtual] || streakAtual[cartaAtual] > maiorStreak[cartaAtual]) {
             maiorStreak[cartaAtual] = streakAtual[cartaAtual];
