@@ -1,4 +1,4 @@
-name: Atualizar JSON a cada 10 minuto
+name: Atualizar JSON a cada 10 minutos
 
 on:
   schedule:
@@ -14,9 +14,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
+
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - run: npm ci || npm install
 
       - run: node Download.js
 
@@ -24,5 +37,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add data
-          git commit -m "Atualização automática do histórico" || echo "Sem mudanças"
+          git diff --cached --quiet || git commit -m "Atualização automática do histórico"
           git push
