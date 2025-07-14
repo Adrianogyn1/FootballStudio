@@ -7,8 +7,9 @@
   <style>
     #roadmap {
       display: grid;
-      grid-auto-flow: column;
-      grid-template-rows: repeat(6, 32px);
+      grid-auto-flow: row;
+      grid-template-columns: 32px;
+      grid-auto-rows: 32px;
       gap: 4px;
       background: #fff;
       padding: 10px;
@@ -24,18 +25,9 @@
       border: 2px solid #444;
       display: inline-block;
     }
-    .H {
-      background-color: #f44336; /* vermelho para Home */
-      border-color: #b71c1c;
-    }
-    .A {
-      background-color: #2196f3; /* azul para Away */
-      border-color: #1565c0;
-    }
-    .E {
-      background-color: #ffeb3b; /* amarelo para Empate */
-      border-color: #fbc02d;
-    }
+    .H { background-color: #f44336; border-color: #d32f2f; } /* vermelho */
+    .A { background-color: #2196f3; border-color: #1565c0; } /* azul */
+    .E { background-color: #ffeb3b; border-color: #fbc02d; } /* amarelo */
   </style>
 </head>
 <body class="bg-light">
@@ -43,57 +35,50 @@
     <h1 class="text-center mb-4">Visualizador Baccarat - Roadmap Torre</h1>
 
     <div class="mb-3 d-flex align-items-center gap-3">
-      <label for="fileSelector" class="form-label mb-0">Selecione o arquivo JSON:</label>
-      <select id="fileSelector" class="form-select w-auto"></select>
-      <button id="loadBtn" class="btn btn-primary">Carregar</button>
+      <label class="form-check-label" for="toggleSource">Usar fonte remota (live)</label>
+      <input type="checkbox" id="toggleSource" />
     </div>
 
-    <div class="form-check form-switch mb-3">
-      <input class="form-check-input" type="checkbox" id="sourceSwitch" />
-      <label class="form-check-label" for="sourceSwitch">Usar URL Externa</label>
-    </div>
-
-    <div class="form-check form-switch mb-3">
-      <input class="form-check-input" type="checkbox" id="liveSwitch" />
-      <label class="form-check-label" for="liveSwitch">Live Result (Atualizar a cada 5s)</label>
+    <div class="mb-3" id="localSelectorContainer">
+      <label for="fileSelector" class="form-label">Selecione o arquivo JSON local:</label>
+      <div class="d-flex gap-2">
+        <select id="fileSelector" class="form-select"></select>
+        <button id="loadBtn" class="btn btn-primary">Carregar</button>
+      </div>
     </div>
 
     <div id="roadmap"></div>
-
-    <div id="stats" class="container mt-4"></div>
-    <div id="streaks" class="container mt-4"></div>
 
     <table id="resultTable" class="table table-bordered table-striped mt-4 d-none">
       <thead class="table-light">
         <tr>
           <th>Horário</th>
-          <th>Casa (Home)</th>
-          <th>Visitante (Away)</th>
+          <th>Casa</th>
+          <th>Visitante</th>
           <th>Resultado</th>
           <th>Troca de Baralho</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
+
+    <div id="stats" class="mt-4"></div>
   </div>
 
   <script>
+    const toggleSource = document.getElementById('toggleSource');
     const fileSelector = document.getElementById('fileSelector');
     const loadBtn = document.getElementById('loadBtn');
+    const localSelectorContainer = document.getElementById('localSelectorContainer');
     const roadmap = document.getElementById('roadmap');
     const resultTable = document.getElementById('resultTable');
     const tbody = resultTable.querySelector('tbody');
-    const sourceSwitch = document.getElementById('sourceSwitch');
-    const liveSwitch = document.getElementById('liveSwitch');
+    const statsDiv = document.getElementById('stats');
 
-    let liveInterval = null;
-
+    // Função para carregar lista local de arquivos
     function carregarListaLocal() {
       fetch('./data/lista.json')
-        .then(res => {
-          if (!res.ok) throw new Error('Não foi possível carregar lista.json');
-          return res.json();
-        })
+        .then(res => res.json())
         .then(lista => {
           fileSelector.innerHTML = '';
           lista.forEach(arquivo => {
@@ -102,156 +87,107 @@
             option.textContent = arquivo;
             fileSelector.appendChild(option);
           });
-          if (lista.length > 0) carregarArquivo(lista[0]);
-          fileSelector.disabled = false;
+          if (lista.length > 0) carregarArquivoLocal(lista[0]);
         })
         .catch(err => {
-          console.error('Erro ao carregar lista.json:', err);
-          fileSelector.innerHTML = '';
-          fileSelector.disabled = true;
-          roadmap.innerHTML = '<p class="text-danger">Erro ao carregar a lista local.</p>';
+          console.error('Erro ao carregar lista local:', err);
         });
     }
 
-    function atualizarFonte() {
-      if (sourceSwitch.checked) {
-        fileSelector.innerHTML = '';
-        fileSelector.disabled = true;
-        carregarArquivo(null);
-      } else {
-        fileSelector.disabled = false;
-        carregarListaLocal();
-      }
-    }
-
-    sourceSwitch.addEventListener('change', atualizarFonte);
-
-    loadBtn.addEventListener('click', () => {
-      const arquivo = fileSelector.value;
-      carregarArquivo(arquivo);
-    });
-
-    liveSwitch.addEventListener('change', () => {
-      if (liveSwitch.checked) {
-        liveInterval = setInterval(() => {
-          const arquivo = fileSelector.value;
-          carregarArquivo(arquivo);
-        }, 15000);
-      } else {
-        clearInterval(liveInterval);
-        liveInterval = null;
-      }
-    });
-
-    atualizarFonte();
-
-    function carregarArquivo(arquivo) {
-      let url = '';
-      if (sourceSwitch.checked) {
-        url = 'https://app.ingridfs.com/inc/historico.php';
-      } else {
-        if (!arquivo) {
-          roadmap.innerHTML = '<p class="text-warning">Selecione um arquivo para carregar.</p>';
-          resultTable.classList.add('d-none');
-          document.getElementById('stats').innerHTML = '';
-          document.getElementById('streaks').innerHTML = '';
-          return;
-        }
-        url = './data/' + arquivo;
-      }
-
-      fetch(url)
-        .then(res => {
-          if (!res.ok) throw new Error('Erro ao carregar JSON');
-          return res.text();
-        })
+    // Carregar arquivo local
+    function carregarArquivoLocal(arquivo) {
+      fetch('./data/' + arquivo)
+        .then(res => res.text())
         .then(text => {
-          console.log('Resposta da URL:', text);
-          let data;
+          const jsonString = text.trim();
+          let data = [];
           try {
-            data = JSON.parse(text);
-          } catch(e) {
-            console.error('Erro ao parsear JSON:', e);
-            roadmap.innerHTML = '<p class="text-danger">JSON inválido da URL externa.</p>';
-            resultTable.classList.add('d-none');
-            document.getElementById('stats').innerHTML = '';
-            document.getElementById('streaks').innerHTML = '';
+            data = JSON.parse(jsonString);
+          } catch (e) {
+            console.error('Erro no parse do arquivo local:', e);
+            alert('Erro no parse do arquivo local: ' + e.message);
             return;
           }
-
-          data.sort((a, b) => new Date(b.horario) - new Date(a.horario));
-
-          mostrarRoadmapTorre(data);
-          mostrarTabela(data);
-
-          const stats = calcularEstatisticas(data);
-          mostrarEstatisticas(stats);
-
-          const streaks = calcularStreaksCartasIgnorandoEmpates(data);
-          mostrarStreaks(streaks);
+          processarDados(data);
         })
-        .catch(error => {
-          console.error('Erro na requisição:', error);
-          roadmap.innerHTML = '<p class="text-danger">Erro ao carregar os dados.</p>';
-          resultTable.classList.add('d-none');
-          document.getElementById('stats').innerHTML = '';
-          document.getElementById('streaks').innerHTML = '';
+        .catch(err => {
+          console.error('Erro ao carregar arquivo local:', err);
+          alert('Erro ao carregar arquivo local: ' + err.message);
         });
     }
 
-    // Torre sem limite 6, empates na mesma coluna do último vencedor válido, coluna quebra só se mudar vencedor (H->A ou A->H)
+    // Carregar dados remoto
+    function carregarDadosRemoto() {
+      const url = 'https://app.ingridfs.com/inc/historico.php';
+      fetch(url)
+        .then(res => res.text())
+        .then(text => {
+          const jsonString = text.trim();
+          let data = [];
+          try {
+            data = JSON.parse(jsonString);
+          } catch (e) {
+            console.error('Erro no parse do JSON remoto:', e);
+            alert('Erro no parse do JSON remoto: ' + e.message);
+            return;
+          }
+          processarDados(data);
+        })
+        .catch(err => {
+          console.error('Erro ao carregar dados remotos:', err);
+          alert('Erro ao carregar dados remotos: ' + err.message);
+        });
+    }
+
+    // Processa dados: mostra roadmap, tabela, estatísticas
+    function processarDados(data) {
+      // ordenar do último para o primeiro (mais recente primeiro)
+      data.sort((a, b) => new Date(b.horario) - new Date(a.horario));
+
+      mostrarRoadmapTorre(data);
+      mostrarTabela(data);
+      mostrarEstatisticas(data);
+    }
+
+    // Mostra roadmap com torre única, empate segue último vencedor
     function mostrarRoadmapTorre(data) {
       roadmap.innerHTML = '';
-      const colunas = [];
-      let colunaAtual = [];
+      const colunas = [[]]; // apenas uma coluna
+
       let ultimoVencedorValido = null;
 
-      for (let i = 0; i < data.length; i++) {
-        let vencedor = data[i].resultado;
+      for (const item of data) {
+        let vencedor = item.resultado.toUpperCase();
 
         if (vencedor === 'E') {
           if (ultimoVencedorValido !== null) {
             vencedor = ultimoVencedorValido;
-          } else {
-            vencedor = 'E';
           }
+          // se ultimoVencedorValido null, mantem E
         } else {
           ultimoVencedorValido = vencedor;
         }
 
-        if (colunaAtual.length === 0) {
-          colunaAtual.push(vencedor);
-          continue;
-        }
-
-        if (vencedor === colunaAtual[0]) {
-          colunaAtual.push(vencedor);
-        } else {
-          colunas.push(colunaAtual);
-          colunaAtual = [vencedor];
-        }
+        colunas[0].push(vencedor);
       }
-      if (colunaAtual.length > 0) colunas.push(colunaAtual);
 
-      colunas.forEach(coluna => {
-        for (let i = 0; i < 6; i++) {
-          const result = coluna[i];
-          const div = document.createElement('div');
-          if (result) {
-            div.className = 'circle ' + result;
-          } else {
-            div.style.width = '28px';
-            div.style.height = '28px';
-          }
-          roadmap.appendChild(div);
-        }
-      });
+      // mostra as bolinhas verticalmente
+      for (const resultado of colunas[0]) {
+        const div = document.createElement('div');
+        div.className = 'circle ' + resultado;
+        roadmap.appendChild(div);
+      }
     }
 
-    // Mostra tabela dos dados
+    // Mostrar tabela
     function mostrarTabela(data) {
       tbody.innerHTML = '';
-      data.forEach(item => {
+      if (data.length === 0) {
+        resultTable.classList.add('d-none');
+        return;
+      }
+      resultTable.classList.remove('d-none');
+      for (const item of data) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.horario}</td>
@@ -261,100 +197,48 @@
           <td>${item.troca_de_baralho}</td>
         `;
         tbody.appendChild(tr);
-      });
-      resultTable.classList.remove('d-none');
+      }
     }
 
-    // Estatísticas básicas
-    function calcularEstatisticas(data) {
-      const stats = {
-        total: data.length,
-        homeWins: 0,
-        awayWins: 0,
-        empates: 0,
-        trocasBaralho: 0,
-      };
+    // Mostrar estatísticas simples (contagem de vitórias por resultado)
+    function mostrarEstatisticas(data) {
+      // Contar quantas vezes H e A ganharam, ignorar empate
+      const contagem = { H: 0, A: 0 };
 
-      data.forEach(item => {
-        switch (item.resultado) {
-          case 'H':
-            stats.homeWins++;
-            break;
-          case 'A':
-            stats.awayWins++;
-            break;
-          case 'E':
-            stats.empates++;
-            break;
+      for (const item of data) {
+        const res = item.resultado.toUpperCase();
+        if (res === 'H' || res === 'A') {
+          contagem[res]++;
         }
-        if (item.troca_de_baralho) stats.trocasBaralho++;
-      });
+      }
 
-      stats.homePercent = ((stats.homeWins / stats.total) * 100).toFixed(2);
-      stats.awayPercent = ((stats.awayWins / stats.total) * 100).toFixed(2);
-      stats.empatesPercent = ((stats.empates / stats.total) * 100).toFixed(2);
-
-      return stats;
-    }
-
-    function mostrarEstatisticas(stats) {
-      const statsDiv = document.getElementById('stats');
       statsDiv.innerHTML = `
-        <h3>Estatísticas</h3>
-        <ul>
-          <li>Total de jogos: ${stats.total}</li>
-          <li>Vitórias Home (H): ${stats.homeWins} (${stats.homePercent}%)</li>
-          <li>Vitórias Away (A): ${stats.awayWins} (${stats.awayPercent}%)</li>
-          <li>Empates (E): ${stats.empates} (${stats.empatesPercent}%)</li>
-          <li>Trocas de Baralho: ${stats.trocasBaralho}</li>
-        </ul>
+        <h4>Estatísticas</h4>
+        <p>Vitórias Casa (H): ${contagem.H}</p>
+        <p>Vitórias Visitante (A): ${contagem.A}</p>
       `;
     }
 
-    // Streaks de cartas, ignorando naipes (tira tudo depois do 1º caractere da carta)
-    function calcularStreaksCartasIgnorandoEmpates(data) {
-      const streakAtual = {};
-      const maiorStreak = {};
-
-      function limparCarta(carta) {
-        return carta ? carta[0] : carta; // só pega o primeiro caractere, ex: "A♣️" -> "A"
+    // Eventos
+    toggleSource.addEventListener('change', () => {
+      if (toggleSource.checked) {
+        localSelectorContainer.style.display = 'none';
+        carregarDadosRemoto();
+      } else {
+        localSelectorContainer.style.display = 'block';
+        carregarListaLocal();
       }
+    });
 
-      for (let i = 0; i < data.length; i++) {
-        const res = data[i].resultado;
-        if (res === 'E') continue;
-
-        let cartaVencedora = null;
-        if (res === 'H') cartaVencedora = limparCarta(data[i].home);
-        else if (res === 'A') cartaVencedora = limparCarta(data[i].away);
-
-        for (const carta in streakAtual) {
-          if (carta !== cartaVencedora) {
-            streakAtual[carta] = 0;
-          }
-        }
-
-        streakAtual[cartaVencedora] = (streakAtual[cartaVencedora] || 0) + 1;
-
-        if (!maiorStreak[cartaVencedora] || streakAtual[cartaVencedora] > maiorStreak[cartaVencedora]) {
-          maiorStreak[cartaVencedora] = streakAtual[cartaVencedora];
-        }
+    loadBtn.addEventListener('click', () => {
+      if (!toggleSource.checked) {
+        const arquivo = fileSelector.value;
+        carregarArquivoLocal(arquivo);
       }
+    });
 
-      return maiorStreak;
-    }
-
-    function mostrarStreaks(streaks) {
-      const streaksDiv = document.getElementById('streaks');
-      let html = '<h3>Maior sequência de vitórias consecutivas por carta (sem naipe)</h3><ul>';
-
-      for (const carta in streaks) {
-        html += `<li><strong>${carta}</strong>: ${streaks[carta]} vitórias consecutivas</li>`;
-      }
-
-      html += '</ul>';
-      streaksDiv.innerHTML = html;
-    }
+    // Inicializa carregando local
+    carregarListaLocal();
   </script>
 </body>
 </html>
