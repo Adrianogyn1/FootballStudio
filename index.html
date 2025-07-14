@@ -35,7 +35,20 @@
       background-color: #ffeb3b; /* amarelo para Empate */
       border-color: #fbc02d;
     }
+    pre#errorOutput {
+      background: #f8d7da;
+      border: 1px solid #f5c2c7;
+      color: #842029;
+      padding: 10px;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 1rem;
+      border-radius: 4px;
+      font-family: monospace;
+    }
   </style>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 </head>
 <body class="bg-light">
   <div class="container py-4">
@@ -74,318 +87,285 @@
       </thead>
       <tbody></tbody>
     </table>
+
+    <pre id="errorOutput" style="display:none;"></pre>
   </div>
 
   <script>
-    const fileSelector = document.getElementById('fileSelector');
-    const loadBtn = document.getElementById('loadBtn');
-    const roadmap = document.getElementById('roadmap');
-    const resultTable = document.getElementById('resultTable');
-    const tbody = resultTable.querySelector('tbody');
-    const sourceSwitch = document.getElementById('sourceSwitch');
-    const liveSwitch = document.getElementById('liveSwitch');
+    $(function() {
+      const $fileSelector = $('#fileSelector');
+      const $loadBtn = $('#loadBtn');
+      const $roadmap = $('#roadmap');
+      const $resultTable = $('#resultTable');
+      const $tbody = $resultTable.find('tbody');
+      const $sourceSwitch = $('#sourceSwitch');
+      const $liveSwitch = $('#liveSwitch');
+      const $stats = $('#stats');
+      const $streaks = $('#streaks');
+      const $errorOutput = $('#errorOutput');
 
-    let liveInterval = null;
+      let liveInterval = null;
 
-    function carregarListaLocal() {
-      fetch('./data/lista.json')
-        .then(res => {
-          if (!res.ok) throw new Error('Não foi possível carregar lista.json');
-          return res.json();
-        })
-        .then(lista => {
-          fileSelector.innerHTML = '';
-          lista.forEach(arquivo => {
-            const option = document.createElement('option');
-            option.value = arquivo;
-            option.textContent = arquivo;
-            fileSelector.appendChild(option);
-          });
-          if (lista.length > 0) carregarArquivo(lista[0]);
-          fileSelector.disabled = false;
-        })
-        .catch(err => {
-          console.error('Erro ao carregar lista.json:', err);
-          fileSelector.innerHTML = '';
-          fileSelector.disabled = true;
-          roadmap.innerHTML = '<p class="text-danger">Erro ao carregar a lista local.</p>';
+      function carregarListaLocal() {
+        $.ajax({
+          url: './data/lista.json',
+          dataType: 'json',
+          success: function(lista) {
+            $fileSelector.empty();
+            lista.forEach(function(arquivo) {
+              $fileSelector.append($('<option>').val(arquivo).text(arquivo));
+            });
+            if (lista.length > 0) carregarArquivo(lista[0]);
+            $fileSelector.prop('disabled', false);
+            $errorOutput.hide().text('');
+          },
+          error: function(err) {
+            const msg = `Erro ao carregar lista.json:\nStatus: ${err.status}\nMensagem: ${err.statusText}`;
+            console.error(msg);
+            $fileSelector.empty().prop('disabled', true);
+            $roadmap.html('<p class="text-danger">Erro ao carregar a lista local.</p>');
+            $errorOutput.show().text(msg);
+          }
         });
-    }
-
-    function atualizarFonte() {
-      if (sourceSwitch.checked) {
-        fileSelector.innerHTML = '';
-        fileSelector.disabled = true;
-        carregarArquivo(null);
-      } else {
-        fileSelector.disabled = false;
-        carregarListaLocal();
       }
-    }
 
-    sourceSwitch.addEventListener('change', atualizarFonte);
-
-    loadBtn.addEventListener('click', () => {
-      const arquivo = fileSelector.value;
-      carregarArquivo(arquivo);
-    });
-
-    liveSwitch.addEventListener('change', () => {
-      if (liveSwitch.checked) {
-        liveInterval = setInterval(() => {
-          const arquivo = fileSelector.value;
-          carregarArquivo(arquivo);
-        }, 15000);
-      } else {
-        clearInterval(liveInterval);
-        liveInterval = null;
-      }
-    });
-
-    atualizarFonte();
-
-    function carregarArquivo(arquivo) {
-      let url = '';
-      if (sourceSwitch.checked) {
-        url = 'https://app.ingridfs.com/inc/historico.php';
-      } else {
-        if (!arquivo) {
-          roadmap.innerHTML = '<p class="text-warning">Selecione um arquivo para carregar.</p>';
-          resultTable.classList.add('d-none');
-          document.getElementById('stats').innerHTML = '';
-          document.getElementById('streaks').innerHTML = '';
-          return;
+      function atualizarFonte() {
+        if ($sourceSwitch.is(':checked')) {
+          $fileSelector.empty().prop('disabled', true);
+          carregarArquivo(null);
+        } else {
+          $fileSelector.prop('disabled', false);
+          carregarListaLocal();
         }
-        url = './data/' + arquivo;
       }
 
-      fetch(url)
-        .then(res => {
-          if (!res.ok) throw new Error('Erro ao carregar JSON');
-          return res.text();
-        })
-        .then(text => {
-          let data;
-          try {
-            data = JSON.parse(text.trim());
-          } catch(e) {
-            console.error('Erro ao parsear JSON:', e);
-            roadmap.innerHTML = '<p class="text-danger">JSON inválido da URL externa.</p>';
-            resultTable.classList.add('d-none');
-            document.getElementById('stats').innerHTML = '';
-            document.getElementById('streaks').innerHTML = '';
+      $sourceSwitch.on('change', function() {
+        atualizarFonte();
+      });
+
+      $loadBtn.on('click', function() {
+        const arquivo = $fileSelector.val();
+        carregarArquivo(arquivo);
+      });
+
+      $liveSwitch.on('change', function() {
+        if ($liveSwitch.is(':checked')) {
+          liveInterval = setInterval(() => {
+            const arquivo = $fileSelector.val();
+            carregarArquivo(arquivo);
+          }, 15000);
+        } else {
+          clearInterval(liveInterval);
+          liveInterval = null;
+        }
+      });
+
+      function carregarArquivo(arquivo) {
+        let url = '';
+        if ($sourceSwitch.is(':checked')) {
+          url = 'https://app.ingridfs.com/inc/historico.php';
+        } else {
+          if (!arquivo) {
+            $roadmap.html('<p class="text-warning">Selecione um arquivo para carregar.</p>');
+            $resultTable.addClass('d-none');
+            $stats.empty();
+            $streaks.empty();
+            $errorOutput.hide().text('');
             return;
           }
+          url = './data/' + arquivo;
+        }
 
-          data.sort((a, b) => new Date(b.horario) - new Date(a.horario));
+        $.ajax({
+          url: url,
+          dataType: 'text',
+          success: function(text) {
+            let data;
+            try {
+              data = JSON.parse(text.trim());
+            } catch(e) {
+              const msg = `Erro ao parsear JSON:\n${e.message}`;
+              console.error(msg);
+              $roadmap.html('<p class="text-danger">JSON inválido da URL externa.</p>');
+              $resultTable.addClass('d-none');
+              $stats.empty();
+              $streaks.empty();
+              $errorOutput.show().text(msg);
+              return;
+            }
 
-          mostrarRoadmapTorre(data);
-          mostrarTabela(data);
+            $errorOutput.hide().text('');
+            data.sort((a, b) => new Date(b.horario) - new Date(a.horario));
 
-          const stats = calcularEstatisticas(data);
-          mostrarEstatisticas(stats);
+            mostrarRoadmapTorre(data);
+            mostrarTabela(data);
 
-          const streaks = calcularStreaksCartasIgnorandoEmpates(data);
-          mostrarStreaks(streaks);
-        })
-        .catch(error => {
-          console.error('Erro na requisição:', error);
-          roadmap.innerHTML = `<p class="text-danger">Erro ao carregar os dados: ${error.message}</p>`;
-          resultTable.classList.add('d-none');
-          document.getElementById('stats').innerHTML = '';
-          document.getElementById('streaks').innerHTML = '';
+            const stats = calcularEstatisticas(data);
+            mostrarEstatisticas(stats);
+
+            const streaks = calcularStreaksCartasIgnorandoEmpates(data);
+            mostrarStreaks(streaks);
+          },
+          error: function(err) {
+            const msg = `Erro ao carregar os dados:\nStatus: ${err.status}\nMensagem: ${err.statusText}\nResposta: ${err.responseText || ''}`;
+            console.error(msg);
+            $roadmap.html('');
+            $resultTable.addClass('d-none');
+            $stats.empty();
+            $streaks.empty();
+            $errorOutput.show().text(msg);
+          }
         });
-    }
+      }
 
-    // Torre sem limite, empate não quebra e mostra amarelo
-    function mostrarRoadmapTorre(data) {
-      roadmap.innerHTML = '';
-      const colunas = [];
-      let colunaAtual = [];
-      let ultimoVencedorValido = null;
+      // Torre sem limite, empate não quebra e mostra amarelo
+      function mostrarRoadmapTorre(data) {
+        $roadmap.empty();
+        const colunas = [];
+        let colunaAtual = [];
+        let ultimoVencedorValido = null;
 
-      for (let i = 0; i < data.length; i++) {
-        const res = data[i].resultado;
+        for (let i = 0; i < data.length; i++) {
+          const res = data[i].resultado;
 
-        if (res === 'E') {
+          if (res === 'E') {
+            colunaAtual.push('E');
+            continue;
+          }
+
           if (colunaAtual.length === 0) {
-            colunaAtual.push('E');
+            colunaAtual.push(res);
+            ultimoVencedorValido = res;
+          } else if (res === ultimoVencedorValido) {
+            colunaAtual.push(res);
           } else {
-            colunaAtual.push('E');
+            colunas.push(colunaAtual);
+            colunaAtual = [res];
+            ultimoVencedorValido = res;
           }
-          continue;
         }
+        if (colunaAtual.length > 0) colunas.push(colunaAtual);
 
-        // H ou A
-        if (colunaAtual.length === 0) {
-          colunaAtual.push(res);
-          ultimoVencedorValido = res;
-        } else if (res === ultimoVencedorValido) {
-          colunaAtual.push(res);
-        } else {
-          colunas.push(colunaAtual);
-          colunaAtual = [res];
-          ultimoVencedorValido = res;
-        }
+        const maxAltura = colunas.reduce((max, col) => Math.max(max, col.length), 0);
+        $roadmap.css('grid-template-rows', `repeat(${maxAltura}, 32px)`);
+
+        colunas.forEach(coluna => {
+          for (let i = 0; i < maxAltura; i++) {
+            const resultado = coluna[i];
+            const $div = $('<div>').addClass('circle');
+            if (resultado) {
+              $div.addClass(resultado);
+            } else {
+              $div.css({width: '28px', height: '28px'});
+            }
+            $roadmap.append($div);
+          }
+        });
       }
 
-      if (colunaAtual.length > 0) colunas.push(colunaAtual);
-
-      const maxAltura = colunas.reduce((max, col) => Math.max(max, col.length), 0);
-      roadmap.style.gridTemplateRows = `repeat(${maxAltura}, 32px)`;
-
-      colunas.forEach(coluna => {
-        for (let i = 0; i < maxAltura; i++) {
-          const resultado = coluna[i];
-          const div = document.createElement('div');
-          if (resultado) {
-            div.className = 'circle ' + resultado;
-          } else {
-            div.style.width = '28px';
-            div.style.height = '28px';
-          }
-          roadmap.appendChild(div);
-        }
-      });
-    }
-
-    // Mostra tabela dos dados
-    function mostrarTabela(data) {
-      tbody.innerHTML = '';
-      data.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${item.horario}</td>
-          <td>${item.home}</td>
-          <td>${item.away}</td>
-          <td>${item.resultado}</td>
-          <td>${item.troca_de_baralho}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-      resultTable.classList.remove('d-none');
-    }
-
-    // Estatísticas básicas
-    function calcularEstatisticas(data) {
-      const stats = {
-        total: data.length,
-        homeWins: 0,
-        awayWins: 0,
-        empates: 0,
-        trocasBaralho: 0,
-      };
-
-      data.forEach(item => {
-        switch (item.resultado) {
-          case 'H':
-            stats.homeWins++;
-            break;
-          case 'A':
-            stats.awayWins++;
-            break;
-          case 'E':
-            stats.empates++;
-            break;
-        }
-        if (item.troca_de_baralho) stats.trocasBaralho++;
-      });
-
-      stats.homePercent = ((stats.homeWins / stats.total) * 100).toFixed(2);
-      stats.awayPercent = ((stats.awayWins / stats.total) * 100).toFixed(2);
-      stats.empatesPercent = ((stats.empates / stats.total) * 100).toFixed(2);
-
-      return stats;
-    }
-
-    function mostrarEstatisticas(stats) {
-      const statsDiv = document.getElementById('stats');
-      statsDiv.innerHTML = `
-        <h3>Estatísticas</h3>
-        <ul>
-          <li>Total de jogos: ${stats.total}</li>
-          <li>Vitórias Home (H): ${stats.homeWins} (${stats.homePercent}%)</li>
-          <li>Vitórias Away (A): ${stats.awayWins} (${stats.awayPercent}%)</li>
-          <li>Empates (E): ${stats.empates} (${stats.empatesPercent}%)</li>
-          <li>Trocas de Baralho: ${stats.trocasBaralho}</li>
-        </ul>
-      `;
-    }
-
-    // Streaks de cartas, ignorando naipes
-    function calcularStreaksCartasIgnorandoEmpates(data) {
-      function limparCarta(carta) {
-        return carta ? carta[0] : carta;
+      // Mostra tabela dos dados
+      function mostrarTabela(data) {
+        $tbody.empty();
+        data.forEach(item => {
+          const tr = `<tr>
+            <td>${item.horario}</td>
+            <td>${item.home}</td>
+            <td>${item.away}</td>
+            <td>${item.resultado}</td>
+            <td>${item.troca_de_baralho}</td>
+          </tr>`;
+          $tbody.append(tr);
+        });
+        $resultTable.removeClass('d-none');
       }
 
-      const streakAtual = {};
-      const maiorStreak = {};
+      // Estatísticas básicas
+      function calcularEstatisticas(data) {
+        const stats = {
+          total: data.length,
+          homeWins: 0,
+          awayWins: 0,
+          empates: 0,
+          trocasBaralho: 0,
+        };
 
-      // Ordena do mais antigo para o mais recente
-      const dataOrdenada = [...data].slice().reverse();
-
-      for (let i = 0; i < dataOrdenada.length; i++) {
-        const rodada = dataOrdenada[i];
-        const res = rodada.resultado;
-        if (res === 'E') continue;
-
-        let cartaAtual = null;
-        if (res === 'H') cartaAtual = limparCarta(rodada.home);
-        else if (res === 'A') cartaAtual = limparCarta(rodada.away);
-
-        const proximaRodada = dataOrdenada[i + 1];
-        if (!proximaRodada) {
-          streakAtual[cartaAtual] = 1;
-          if (!maiorStreak[cartaAtual] || streakAtual[cartaAtual] > maiorStreak[cartaAtual]) {
-            maiorStreak[cartaAtual] = streakAtual[cartaAtual];
+        data.forEach(item => {
+          switch (item.resultado) {
+            case 'H': stats.homeWins++; break;
+            case 'A': stats.awayWins++; break;
+            case 'E': stats.empates++; break;
           }
-          continue;
-        }
+          if (item.troca_de_baralho) stats.trocasBaralho++;
+        });
 
-        const resProx = proximaRodada.resultado;
-        if (resProx === 'E') {
-          streakAtual[cartaAtual] = (streakAtual[cartaAtual] || 0) + 1;
-          if (!maiorStreak[cartaAtual] || streakAtual[cartaAtual] > maiorStreak[cartaAtual]) {
-            maiorStreak[cartaAtual] = streakAtual[cartaAtual];
-          }
-          continue;
-        }
+        stats.homePercent = ((stats.homeWins / stats.total) * 100).toFixed(2);
+        stats.awayPercent = ((stats.awayWins / stats.total) * 100).toFixed(2);
+        stats.empatesPercent = ((stats.empates / stats.total) * 100).toFixed(2);
 
-        const cartaHomeProx = limparCarta(proximaRodada.home);
-        const cartaAwayProx = limparCarta(proximaRodada.away);
-
-        let cartaContinuaStreak = false;
-        if (resProx === 'H' && cartaAtual === cartaHomeProx) {
-          cartaContinuaStreak = true;
-        } else if (resProx === 'A' && cartaAtual === cartaAwayProx) {
-          cartaContinuaStreak = true;
-        }
-
-        if (cartaContinuaStreak) {
-          streakAtual[cartaAtual] = (streakAtual[cartaAtual] || 0) + 1;
-        } else {
-          streakAtual[cartaAtual] = 0;
-        }
-
-        if (!maiorStreak[cartaAtual] || streakAtual[cartaAtual] > maiorStreak[cartaAtual]) {
-          maiorStreak[cartaAtual] = streakAtual[cartaAtual];
-        }
+        return stats;
       }
 
-      return maiorStreak;
-    }
-
-    function mostrarStreaks(streaks) {
-      const streaksDiv = document.getElementById('streaks');
-      let html = '<h3>Maior sequência de vitórias consecutivas por carta (sem naipe)</h3><ul>';
-
-      for (const carta in streaks) {
-        html += `<li><strong>${carta}</strong>: ${streaks[carta]} vitórias consecutivas</li>`;
+      function mostrarEstatisticas(stats) {
+        $stats.html(`
+          <h3>Estatísticas</h3>
+          <ul>
+            <li>Total de jogos: ${stats.total}</li>
+            <li>Vitórias Home (H): ${stats.homeWins} (${stats.homePercent}%)</li>
+            <li>Vitórias Away (A): ${stats.awayWins} (${stats.awayPercent}%)</li>
+            <li>Empates (E): ${stats.empates} (${stats.empatesPercent}%)</li>
+            <li>Trocas de Baralho: ${stats.trocasBaralho}</li>
+          </ul>
+        `);
       }
 
-      html += '</ul>';
-      streaksDiv.innerHTML = html;
-    }
-  </script>
-</body>
-</html>
+      // Streaks de cartas, ignorando naipes
+      function calcularStreaksCartasIgnorandoEmpates(data) {
+        function limparCarta(carta) {
+          return carta ? carta[0] : carta;
+        }
+
+        const streakAtual = {};
+        const maiorStreak = {};
+
+        // Ordena do mais antigo para o mais recente
+        const dataOrdenada = [...data].slice().reverse();
+
+        for (let i = 0; i < dataOrdenada.length; i++) {
+          const rodada = dataOrdenada[i];
+          const res = rodada.resultado;
+          if (res === 'E') continue;
+
+          let cartaAtual = null;
+          if (res === 'H') cartaAtual = limparCarta(rodada.home);
+          else if (res === 'A') cartaAtual = limparCarta(rodada.away);
+
+          const proximaRodada = dataOrdenada[i + 1];
+          if (!proximaRodada) {
+            streakAtual[cartaAtual] = 1;
+            if (!maiorStreak[cartaAtual] || streakAtual[cartaAtual] > maiorStreak[cartaAtual]) {
+              maiorStreak[cartaAtual] = streakAtual[cartaAtual];
+            }
+            continue;
+          }
+
+          const resProx = proximaRodada.resultado;
+          if (resProx === 'E') {
+            streakAtual[cartaAtual] = (streakAtual[cartaAtual] || 0) + 1;
+            if (!maiorStreak[cartaAtual] || streakAtual[cartaAtual] > maiorStreak[cartaAtual]) {
+              maiorStreak[cartaAtual] = streakAtual[cartaAtual];
+            }
+            continue;
+          }
+
+          const cartaHomeProx = limparCarta(proximaRodada.home);
+          const cartaAwayProx = limparCarta(proximaRodada.away);
+
+          let cartaContinuaStreak = false;
+          if (resProx === 'H' && cartaAtual === cartaHomeProx) {
+            cartaContinuaStreak = true;
+          } else if (resProx === 'A' && cartaAtual === cartaAwayProx) {
+            cartaContinuaStreak = true;
+          }
+
+          if (cartaContin
+    
