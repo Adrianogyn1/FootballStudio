@@ -8,25 +8,26 @@
     #roadmap {
       display: grid;
       grid-auto-flow: column;
-      grid-template-rows: repeat(6, 32px);
       gap: 4px;
       background: #fff;
       padding: 10px;
       border: 1px solid #ccc;
-      min-height: 200px;
       width: fit-content;
       margin: 20px auto;
+      align-items: start;
     }
+
     .circle {
       width: 28px;
       height: 28px;
       border-radius: 50%;
       border: 2px solid #444;
-      display: inline-block;
     }
-    .V { background-color: #4caf50; border-color: #388e3c; }
-    .E { background-color: #ffeb3b; border-color: #fbc02d; }
-    .D { background-color: #f44336; border-color: #d32f2f; }
+
+    .H { background-color: #2196f3; border-color: #1976d2; } /* Azul - Home venceu */
+    .D { background-color: #f44336; border-color: #d32f2f; } /* Vermelho - Away venceu */
+    .E { background-color: #ffeb3b; border-color: #fbc02d; } /* Amarelo - Empate */
+    .empty { background-color: #eee; border-color: #ccc; }
   </style>
 </head>
 <body class="bg-light">
@@ -67,6 +68,7 @@
     fetch('./data/lista.json')
       .then(res => res.json())
       .then(lista => {
+        fileSelector.innerHTML = '';
         lista.forEach(arquivo => {
           const option = document.createElement('option');
           option.value = arquivo;
@@ -74,11 +76,14 @@
           fileSelector.appendChild(option);
         });
         if (lista.length > 0) carregarArquivo(lista[0]);
+      })
+      .catch(error => {
+        console.error('Erro ao carregar lista.json:', error);
       });
 
     loadBtn.addEventListener('click', () => {
       const arquivo = fileSelector.value;
-      carregarArquivo(arquivo);
+      if (arquivo) carregarArquivo(arquivo);
     });
 
     function carregarArquivo(arquivo) {
@@ -87,39 +92,56 @@
         .then(data => {
           mostrarRoadmapTorre(data);
           mostrarTabela(data);
+        })
+        .catch(error => {
+          console.error('Erro ao carregar arquivo JSON:', error);
         });
+    }
+
+    function normalizarResultado(res) {
+      switch (res) {
+        case 'H': return 'H'; // Home venceu → Azul
+        case 'A': return 'D'; // Away venceu → Vermelho
+        case 'E': return 'E'; // Empate → Amarelo
+        default: return 'E';  // Qualquer outro → Empate
+      }
     }
 
     function mostrarRoadmapTorre(data) {
       roadmap.innerHTML = '';
       const colunas = [];
       let colunaAtual = [];
-      let ultimo = null;
+      let ultimoResultadoPrincipal = null;
 
       data.forEach(item => {
-        const atual = item.resultado;
-        if (atual === ultimo && colunaAtual.length < 6) {
-          colunaAtual.push(atual);
+        const resultado = normalizarResultado(item.resultado);
+
+        if (resultado === 'E') {
+          // Empate entra na mesma coluna
+          colunaAtual.push(resultado);
         } else {
-          if (colunaAtual.length > 0) colunas.push(colunaAtual);
-          colunaAtual = [atual];
-          ultimo = atual;
+          if (resultado !== ultimoResultadoPrincipal) {
+            // Mudança de H ↔ A: nova coluna
+            if (colunaAtual.length > 0) colunas.push(colunaAtual);
+            colunaAtual = [resultado];
+            ultimoResultadoPrincipal = resultado;
+          } else {
+            colunaAtual.push(resultado);
+          }
         }
       });
+
       if (colunaAtual.length > 0) colunas.push(colunaAtual);
 
+      roadmap.style.gridTemplateColumns = `repeat(${colunas.length}, 32px)`;
+      roadmap.style.gridTemplateRows = 'auto';
+
       colunas.forEach(coluna => {
-        for (let i = 0; i < 6; i++) {
-          const result = coluna[i];
+        coluna.forEach(result => {
           const div = document.createElement('div');
-          if (result) {
-            div.className = 'circle ' + result;
-          } else {
-            div.style.width = '28px';
-            div.style.height = '28px';
-          }
+          div.className = 'circle ' + result;
           roadmap.appendChild(div);
-        }
+        });
       });
     }
 
@@ -140,5 +162,4 @@
     }
   </script>
 </body>
-  </html>
-  
+</html>
