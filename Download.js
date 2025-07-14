@@ -88,6 +88,21 @@ async function executar() {
       console.log(`Atualizado: ${nome} (${unicos.length} registros únicos)`);
     }
 
+    const outputDir = "data";
+
+// Depois de salvar todos os arquivos JSON na pasta `data`...
+
+// Lê todos os arquivos JSON da pasta
+const arquivos = fs.readdirSync(outputDir)
+  .filter(nome => nome.endsWith(".json"));
+
+// Salva a lista em um arquivo `lista.json` na mesma pasta
+fs.writeFileSync(
+  path.join(outputDir, "lista.json"),
+  JSON.stringify(arquivos, null, 2),
+  "utf8"
+);
+
   } catch (err) {
     console.error("Erro ao baixar ou processar:", err.message);
     process.exit(1);
