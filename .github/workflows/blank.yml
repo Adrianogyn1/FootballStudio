@@ -1,4 +1,4 @@
-name: Atualizar JSON a cada minuto
+name: Atualizar JSON a cada 10 minuto
 
 on:
   schedule:
