@@ -1,148 +1,144 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<title>Visualizador football</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 900px;
-    margin: auto;
-    padding: 20px;
-    background: #f7f7f7;
-  }
-  h1 {
-    text-align: center;
-  }
-  select, button {
-    font-size: 1rem;
-    padding: 6px 12px;
-    margin: 10px 0;
-  }
-  #roadmap {
-    margin: 20px 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-  }
-  .circle {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 2px solid #444;
-  }
-  .V { background-color: #4caf50; border-color: #388e3c; }  /* Vitória: verde */
-  .E { background-color: #ffeb3b; border-color: #fbc02d; }  /* Empate: amarelo */
-  .D { background-color: #f44336; border-color: #d32f2f; }  /* Derrota: vermelho */
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-  }
-  th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: center;
-  }
-  th {
-    background: #eee;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Visualizador Baccarat - Roadmap Torre</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    #roadmap {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-rows: repeat(6, 32px);
+      gap: 4px;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      min-height: 200px;
+      width: fit-content;
+      margin: 20px auto;
+    }
+    .circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #444;
+      display: inline-block;
+    }
+    .V { background-color: #4caf50; border-color: #388e3c; }
+    .E { background-color: #ffeb3b; border-color: #fbc02d; }
+    .D { background-color: #f44336; border-color: #d32f2f; }
+  </style>
 </head>
-<body>
-  <h1>Visualizador Baccarat</h1>
+<body class="bg-light">
+  <div class="container py-4">
+    <h1 class="text-center mb-4">Visualizador Baccarat - Roadmap Torre</h1>
 
-  <label for="fileSelector">Selecione o arquivo JSON:</label><br />
-  <select id="fileSelector"></select>
-  <button id="loadBtn">Carregar</button>
+    <div class="mb-3">
+      <label for="fileSelector" class="form-label">Selecione o arquivo JSON:</label>
+      <div class="d-flex gap-2">
+        <select id="fileSelector" class="form-select"></select>
+        <button id="loadBtn" class="btn btn-primary">Carregar</button>
+      </div>
+    </div>
 
-  <div id="roadmap" title="Roadmap dos resultados"></div>
+    <div id="roadmap"></div>
 
-  <table id="resultTable" aria-label="Tabela de resultados" hidden>
-    <thead>
-      <tr>
-        <th>Horário</th>
-        <th>Casa (Home)</th>
-        <th>Visitante (Away)</th>
-        <th>Resultado</th>
-        <th>Troca de Baralho</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <table id="resultTable" class="table table-bordered table-striped mt-4 d-none">
+      <thead class="table-light">
+        <tr>
+          <th>Horário</th>
+          <th>Casa</th>
+          <th>Visitante</th>
+          <th>Resultado</th>
+          <th>Troca de Baralho</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-<script>
-  const fileSelector = document.getElementById('fileSelector');
-  const loadBtn = document.getElementById('loadBtn');
-  const roadmap = document.getElementById('roadmap');
-  const resultTable = document.getElementById('resultTable');
-  const tbody = resultTable.querySelector('tbody');
+  <script>
+    const fileSelector = document.getElementById('fileSelector');
+    const loadBtn = document.getElementById('loadBtn');
+    const roadmap = document.getElementById('roadmap');
+    const resultTable = document.getElementById('resultTable');
+    const tbody = resultTable.querySelector('tbody');
 
-  // Carrega lista de arquivos
-  fetch('./data/lista.json')
-    .then(res => {
-      if(!res.ok) throw new Error('Não foi possível carregar a lista de arquivos');
-      return res.json();
-    })
-    .then(files => {
-      files.forEach(f => {
-        const option = document.createElement('option');
-        option.value = f;
-        option.textContent = f;
-        fileSelector.appendChild(option);
+    fetch('./data/lista.json')
+      .then(res => res.json())
+      .then(lista => {
+        lista.forEach(arquivo => {
+          const option = document.createElement('option');
+          option.value = arquivo;
+          option.textContent = arquivo;
+          fileSelector.appendChild(option);
+        });
+        if (lista.length > 0) carregarArquivo(lista[0]);
       });
-    })
-    .catch(err => {
-      alert('Erro ao carregar lista de arquivos: ' + err.message);
+
+    loadBtn.addEventListener('click', () => {
+      const arquivo = fileSelector.value;
+      carregarArquivo(arquivo);
     });
 
-  loadBtn.addEventListener('click', () => {
-    const arquivo = fileSelector.value;
-    if (!arquivo) return alert('Selecione um arquivo');
+    function carregarArquivo(arquivo) {
+      fetch('./data/' + arquivo)
+        .then(res => res.json())
+        .then(data => {
+          mostrarRoadmapTorre(data);
+          mostrarTabela(data);
+        });
+    }
 
-    fetch('./data/' + arquivo)
-      .then(res => {
-        if(!res.ok) throw new Error('Não foi possível carregar o arquivo JSON');
-        return res.json();
-      })
-      .then(data => {
-        mostrarRoadmap(data);
-        mostrarTabela(data);
-      })
-      .catch(err => {
-        alert('Erro ao carregar JSON: ' + err.message);
+    function mostrarRoadmapTorre(data) {
+      roadmap.innerHTML = '';
+      const colunas = [];
+      let colunaAtual = [];
+      let ultimo = null;
+
+      data.forEach(item => {
+        const atual = item.resultado;
+        if (atual === ultimo && colunaAtual.length < 6) {
+          colunaAtual.push(atual);
+        } else {
+          if (colunaAtual.length > 0) colunas.push(colunaAtual);
+          colunaAtual = [atual];
+          ultimo = atual;
+        }
       });
-  });
+      if (colunaAtual.length > 0) colunas.push(colunaAtual);
 
-  function mostrarRoadmap(data) {
-    roadmap.innerHTML = '';
-    data.forEach(item => {
-      const circle = document.createElement('div');
-      circle.className = 'circle ' + (item.resultado || 'E'); // padrão amarelo se vazio
-      circle.title = `${item.horario} - Resultado: ${item.resultado}`;
-      roadmap.appendChild(circle);
-    });
-  }
+      colunas.forEach(coluna => {
+        for (let i = 0; i < 6; i++) {
+          const result = coluna[i];
+          const div = document.createElement('div');
+          if (result) {
+            div.className = 'circle ' + result;
+          } else {
+            div.style.width = '28px';
+            div.style.height = '28px';
+          }
+          roadmap.appendChild(div);
+        }
+      });
+    }
 
-  function mostrarTabela(data) {
-    tbody.innerHTML = '';
-    data.forEach(item => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${item.horario}</td>
-        <td>${item.home}</td>
-        <td>${item.away}</td>
-        <td>${item.resultado}</td>
-        <td>${item.troca_de_baralho}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-    resultTable.hidden = false;
-  }
-</script>
-
+    function mostrarTabela(data) {
+      tbody.innerHTML = '';
+      data.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.horario}</td>
+          <td>${item.home}</td>
+          <td>${item.away}</td>
+          <td>${item.resultado}</td>
+          <td>${item.troca_de_baralho}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      resultTable.classList.remove('d-none');
+    }
+  </script>
 </body>
   </html>
   
