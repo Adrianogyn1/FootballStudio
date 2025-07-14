@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Visualizador Baccarat</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    background: #f7f7f7;
+  }
+  h1 {
+    text-align: center;
+  }
+  select, button {
+    font-size: 1rem;
+    padding: 6px 12px;
+    margin: 10px 0;
+  }
+  #roadmap {
+    margin: 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }
+  .circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #444;
+  }
+  .V { background-color: #4caf50; border-color: #388e3c; }  /* Vitória: verde */
+  .E { background-color: #ffeb3b; border-color: #fbc02d; }  /* Empate: amarelo */
+  .D { background-color: #f44336; border-color: #d32f2f; }  /* Derrota: vermelho */
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+  }
+  th {
+    background: #eee;
+  }
+</style>
+</head>
+<body>
+  <h1>Visualizador Baccarat</h1>
+
+  <label for="fileSelector">Selecione o arquivo JSON:</label><br />
+  <select id="fileSelector"></select>
+  <button id="loadBtn">Carregar</button>
+
+  <div id="roadmap" title="Roadmap dos resultados"></div>
+
+  <table id="resultTable" aria-label="Tabela de resultados" hidden>
+    <thead>
+      <tr>
+        <th>Horário</th>
+        <th>Casa (Home)</th>
+        <th>Visitante (Away)</th>
+        <th>Resultado</th>
+        <th>Troca de Baralho</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+  const fileSelector = document.getElementById('fileSelector');
+  const loadBtn = document.getElementById('loadBtn');
+  const roadmap = document.getElementById('roadmap');
+  const resultTable = document.getElementById('resultTable');
+  const tbody = resultTable.querySelector('tbody');
+
+  // Carrega lista de arquivos
+  fetch('./data/lista.json')
+    .then(res => {
+      if(!res.ok) throw new Error('Não foi possível carregar a lista de arquivos');
+      return res.json();
+    })
+    .then(files => {
+      files.forEach(f => {
+        const option = document.createElement('option');
+        option.value = f;
+        option.textContent = f;
+        fileSelector.appendChild(option);
+      });
+    })
+    .catch(err => {
+      alert('Erro ao carregar lista de arquivos: ' + err.message);
+    });
+
+  loadBtn.addEventListener('click', () => {
+    const arquivo = fileSelector.value;
+    if (!arquivo) return alert('Selecione um arquivo');
+
+    fetch('./data/' + arquivo)
+      .then(res => {
+        if(!res.ok) throw new Error('Não foi possível carregar o arquivo JSON');
+        return res.json();
+      })
+      .then(data => {
+        mostrarRoadmap(data);
+        mostrarTabela(data);
+      })
+      .catch(err => {
+        alert('Erro ao carregar JSON: ' + err.message);
+      });
+  });
+
+  function mostrarRoadmap(data) {
+    roadmap.innerHTML = '';
+    data.forEach(item => {
+      const circle = document.createElement('div');
+      circle.className = 'circle ' + (item.resultado || 'E'); // padrão amarelo se vazio
+      circle.title = `${item.horario} - Resultado: ${item.resultado}`;
+      roadmap.appendChild(circle);
+    });
+  }
+
+  function mostrarTabela(data) {
+    tbody.innerHTML = '';
+    data.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.horario}</td>
+        <td>${item.home}</td>
+        <td>${item.away}</td>
+        <td>${item.resultado}</td>
+        <td>${item.troca_de_baralho}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+    resultTable.hidden = false;
+  }
+</script>
+
+</body>
+  </html>
+  
