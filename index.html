@@ -206,7 +206,7 @@
               const htmlTooltip = `
                 <div>
                   <strong>Vitória:</strong> ${item.resultado}<br>
-                  <strong>Cartas:</strong> Home = ${home}, Away = ${away}<br>
+                   H = ${home} x A = ${away}<br>
                   <strong>Horário:</strong> ${item.horario}
                 </div>
               `;
@@ -237,8 +237,7 @@
           <td>${item.horario}</td>
           <td>${item.home}</td>
           <td>${item.away}</td>
-          <td>${item.resultado}</td>
-          <td>${item.troca_de_baralho}</td>
+          <td>${item.resultado}</td>          
         `;
         tbody.appendChild(tr);
       });
