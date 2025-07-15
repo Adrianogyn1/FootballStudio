@@ -23,9 +23,18 @@
       border: 2px solid #444;
       display: inline-block;
     }
-    .H { background-color: #f44336; border-color: #b71c1c; }
-    .A { background-color: #2196f3; border-color: #1565c0; }
-    .D { background-color: #ffeb3b; border-color: #fbc02d; }
+    .H {
+      background-color: #f44336;
+      border-color: #b71c1c;
+    }
+    .A {
+      background-color: #2196f3;
+      border-color: #1565c0;
+    }
+    .D {
+      background-color: #ffeb3b;
+      border-color: #fbc02d;
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -206,7 +215,8 @@
               const htmlTooltip = `
                 <div>
                   <strong>Vitória:</strong> ${item.resultado}<br>
-                   H = ${home} x A = ${away}<br>
+                  H: ${home} <br>
+                  A: ${away} <br>
                   <strong>Horário:</strong> ${item.horario}
                 </div>
               `;
@@ -224,7 +234,6 @@
         }
       });
 
-      // Ativar tooltips
       const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
     }
@@ -237,7 +246,8 @@
           <td>${item.horario}</td>
           <td>${item.home}</td>
           <td>${item.away}</td>
-          <td>${item.resultado}</td>          
+          <td>${item.resultado}</td>
+          <td>${item.troca_de_baralho}</td>
         `;
         tbody.appendChild(tr);
       });
