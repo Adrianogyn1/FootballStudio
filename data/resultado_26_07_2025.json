@@ -14701,5 +14701,19 @@
     "away": "K♣️",
     "resultado": "A",
     "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-07-26 14:26:08",
+    "home": "7♠️",
+    "away": "10♦️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-07-26 14:40:15",
+    "home": "1",
+    "away": "1",
+    "resultado": "D",
+    "troca_de_baralho": false
   }
 ]
