@@ -5018,5 +5018,401 @@
     "away": "A♣️",
     "resultado": "A",
     "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:40:06",
+    "home": "9♦️",
+    "away": "J♠️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:40:28",
+    "home": "3♦️",
+    "away": "2♠️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:40:50",
+    "home": "8♦️",
+    "away": "A♠️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:41:12",
+    "home": "J♦️",
+    "away": "J♠️",
+    "resultado": "D",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:41:33",
+    "home": "10♣️",
+    "away": "4♣️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:41:55",
+    "home": "A♣️",
+    "away": "A♣️",
+    "resultado": "D",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:42:18",
+    "home": "7♦️",
+    "away": "3♣️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:42:39",
+    "home": "K♠️",
+    "away": "5♦️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:43:00",
+    "home": "7❤️",
+    "away": "4♦️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:43:21",
+    "home": "9♠️",
+    "away": "Q♣️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:43:43",
+    "home": "4❤️",
+    "away": "4♠️",
+    "resultado": "D",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:44:04",
+    "home": "2♦️",
+    "away": "5♦️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:44:27",
+    "home": "A♣️",
+    "away": "4♦️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:44:48",
+    "home": "8♠️",
+    "away": "3♠️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:45:08",
+    "home": "5♠️",
+    "away": "5❤️",
+    "resultado": "D",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:45:30",
+    "home": "Q❤️",
+    "away": "8♣️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:45:51",
+    "home": "7♦️",
+    "away": "6❤️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:46:12",
+    "home": "J❤️",
+    "away": "7♣️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:46:34",
+    "home": "5♠️",
+    "away": "10❤️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:46:57",
+    "home": "4♦️",
+    "away": "Q❤️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:47:19",
+    "home": "6♠️",
+    "away": "8♣️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:47:42",
+    "home": "K❤️",
+    "away": "2♠️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:48:04",
+    "home": "3♣️",
+    "away": "8❤️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:48:49",
+    "home": "J♣️",
+    "away": "8♠️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:49:11",
+    "home": "2❤️",
+    "away": "3♦️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:49:32",
+    "home": "8♣️",
+    "away": "9❤️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:49:54",
+    "home": "10♦️",
+    "away": "10♦️",
+    "resultado": "D",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:50:16",
+    "home": "6❤️",
+    "away": "8♦️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:50:38",
+    "home": "2❤️",
+    "away": "J♠️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:51:00",
+    "home": "2♣️",
+    "away": "J❤️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:51:20",
+    "home": "3❤️",
+    "away": "K❤️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:51:42",
+    "home": "J♠️",
+    "away": "4♦️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:52:04",
+    "home": "10♣️",
+    "away": "A❤️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:52:27",
+    "home": "Q♠️",
+    "away": "5❤️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:52:49",
+    "home": "K♦️",
+    "away": "8♠️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:53:10",
+    "home": "8♣️",
+    "away": "7♠️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:53:33",
+    "home": "A♦️",
+    "away": "7♣️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:53:56",
+    "home": "3❤️",
+    "away": "7♠️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:54:18",
+    "home": "4♣️",
+    "away": "K♦️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:54:40",
+    "home": "4♦️",
+    "away": "2♦️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:55:02",
+    "home": "7♦️",
+    "away": "2♣️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:55:25",
+    "home": "Q♣️",
+    "away": "9❤️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:55:48",
+    "home": "8♣️",
+    "away": "7♣️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:56:13",
+    "home": "Q♠️",
+    "away": "9♦️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:56:36",
+    "home": "7♠️",
+    "away": "5♦️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:56:59",
+    "home": "3❤️",
+    "away": "4♣️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:57:23",
+    "home": "A♣️",
+    "away": "10♠️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:57:44",
+    "home": "J♦️",
+    "away": "J♦️",
+    "resultado": "D",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:58:13",
+    "home": "6❤️",
+    "away": "A❤️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 05:58:17",
+    "troca_de_baralho": true
+  },
+  {
+    "horario": "2025-08-01 05:59:39",
+    "home": "9♦️",
+    "away": "J♦️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 06:00:03",
+    "home": "J♣️",
+    "away": "9♣️",
+    "resultado": "H",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 06:00:26",
+    "home": "6♠️",
+    "away": "Q♦️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 06:00:49",
+    "home": "5♣️",
+    "away": "8♠️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 06:01:12",
+    "home": "5❤️",
+    "away": "10❤️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 06:01:34",
+    "home": "7♦️",
+    "away": "Q❤️",
+    "resultado": "A",
+    "troca_de_baralho": false
+  },
+  {
+    "horario": "2025-08-01 06:01:56",
+    "home": "7♦️",
+    "away": "3♠️",
+    "resultado": "H",
+    "troca_de_baralho": false
   }
 ]
