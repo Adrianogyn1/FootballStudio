@@ -1,41 +1,41 @@
-#name: Atualizar JSON a cada 10 minutos
+name: Atualizar JSON a cada 10 minutos
 
-#on:
- # schedule:
-  #  - cron: "*/10 * * * *"
-  #workflow_dispatch:
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
 
-#permissions:
-#  contents: write
+permissions:
+  contents: write
 
-#jobs:
-#  update-json:
-   # runs-on: ubuntu-latest
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
 
-   # steps:
-#      - uses: actions/checkout@v3
-     #   with:
-    #      persist-credentials: true
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: true
 
-      #- uses: actions/setup-node@v3
-     #   with:
-    #      node-version: '18'
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-  #    - name: Cache Node.js dependencies
-   #     uses: actions/cache@v3
-     #   with:
-      #    path: ~/.npm
-     #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-     #     restore-keys: |
-      #      ${{ runner.os }}-node-
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-     # #- run: npm ci || npm install
+      #- run: npm ci || npm install
 
-    #  - run: node Download.js
+      - run: node Download.js
 
-    #  - run: |
-#          git config user.name "github-actions"
-      #    git config user.email "github-actions@github.com"
-      #    git add data
-        #  git diff --cached --quiet || git commit -m "Atualização automática do histórico"
-        #  git push
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "Atualização automática do histórico"
+          git push
