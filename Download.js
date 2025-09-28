@@ -27,7 +27,8 @@ const fs = require("fs");
 const https = require("https");
 const path = require("path");
 
-const url = "https://app.ingridfs.com/inc/historico.php";
+const url = "https://app.ingridcorrea.com/telegram_web_limpo.php?peer=-1001721350150&limit=500";
+  /*"https://app.ingridfs.com/inc/historico.php";*/
 const outputDir = "data";
 fs.mkdirSync(outputDir, { recursive: true });
 
